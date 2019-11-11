@@ -28,7 +28,7 @@ namespace Shop.Web.Data
         /// </summary>
         /// <param name="id">Id producto</param>
         /// <returns></returns>
-        public Product GetProducts(int id)
+        public Product GetProduct(int id)
         {
             return this.context.Products.Find(id);
         }

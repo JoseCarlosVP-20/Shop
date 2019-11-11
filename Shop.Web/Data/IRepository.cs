@@ -11,7 +11,7 @@ namespace Shop.Web.Data
 
         IEnumerable<Product> GetProducts();
 
-        Product GetProducts(int id);
+        Product GetProduct(int id);
 
         bool ProductExists(int id);
 
