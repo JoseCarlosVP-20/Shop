@@ -5,6 +5,7 @@ namespace Shop.Web.Data
     using System.Linq;
     using System.Threading.Tasks;
     using Entities;
+
     public class Repository : IRepository
     {
         private readonly DataContext context;

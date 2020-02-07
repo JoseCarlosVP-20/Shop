@@ -22,7 +22,6 @@ namespace Shop.Web
             {
                 var seeder = scope.ServiceProvider.GetService<SeedDb>();
                 seeder.SeedAsync().Wait();
-                
             }
         }
 

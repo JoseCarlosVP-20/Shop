@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Shop.Web.Data;
-using Shop.Web.Data.Entities;
-
-namespace Shop.Web.Controllers
+﻿namespace Shop.Web.Controllers
 {
+    using Data;
+    using Data.Entities;
+    using Helpers;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using System.Threading.Tasks;
+
     public class ProductsController : Controller
     {
         private readonly IRepository repository;
+        private readonly IUserHelper userHelper;
 
-        public ProductsController(IRepository repository)
+        public ProductsController(IRepository repository, IUserHelper userHelper)
         {
             this.repository = repository;
+            this.userHelper = userHelper;
         }
 
         // GET: Products
@@ -49,14 +48,15 @@ namespace Shop.Web.Controllers
         }
 
         // POST: Products/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
             if (ModelState.IsValid)
             {
+                //TODO: Cambiar por el usuario logeado
+                product.User = await this.userHelper.GetUserByEmailAsync("josekarlos62@gmail.com");
+
                 this.repository.AddProduct(product);
                 await this.repository.SaveAllSync();
                 return RedirectToAction(nameof(Index));
@@ -81,17 +81,18 @@ namespace Shop.Web.Controllers
         }
 
         // POST: Products/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product product)
         {
-
             if (ModelState.IsValid)
             {
                 try
                 {
+
+                    //TODO: Cambiar por el usuario logeado
+                    product.User = await this.userHelper.GetUserByEmailAsync("josekarlos62@gmail.com");
+
                     this.repository.UpdateProduct(product);
                     await this.repository.SaveAllSync();
                 }
@@ -120,7 +121,7 @@ namespace Shop.Web.Controllers
             }
 
             var product = this.repository.GetProduct(id.Value);
-                
+
             if (product == null)
             {
                 return NotFound();
