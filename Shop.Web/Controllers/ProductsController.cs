@@ -1,38 +1,39 @@
 ﻿namespace Shop.Web.Controllers
 {
+    using System.Threading.Tasks;
     using Data;
     using Data.Entities;
     using Helpers;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
-    using System.Threading.Tasks;
 
     public class ProductsController : Controller
     {
-        private readonly IRepository repository;
+        private readonly IProductRepository productRepository;
+
         private readonly IUserHelper userHelper;
 
-        public ProductsController(IRepository repository, IUserHelper userHelper)
+        public ProductsController(IProductRepository productRepository, IUserHelper userHelper)
         {
-            this.repository = repository;
+            this.productRepository = productRepository;
             this.userHelper = userHelper;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(this.repository.GetProducts());
+            return View(this.productRepository.GetAll());
         }
 
         // GET: Products/Details/5
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = this.repository.GetProduct(id.Value);
+            var product = await this.productRepository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -54,29 +55,29 @@
         {
             if (ModelState.IsValid)
             {
-                //TODO: Cambiar por el usuario logeado
-                product.User = await this.userHelper.GetUserByEmailAsync("josekarlos62@gmail.com");
-
-                this.repository.AddProduct(product);
-                await this.repository.SaveAllSync();
+                // TODO: Pending to change to: this.User.Identity.Name
+                product.User = await this.userHelper.GetUserByEmailAsync("jzuluaga55@gmail.com");
+                await this.productRepository.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
+
             return View(product);
         }
 
         // GET: Products/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = this.repository.GetProduct(id.Value);
+            var product = await this.productRepository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
             }
+
             return View(product);
         }
 
@@ -89,16 +90,13 @@
             {
                 try
                 {
-
-                    //TODO: Cambiar por el usuario logeado
-                    product.User = await this.userHelper.GetUserByEmailAsync("josekarlos62@gmail.com");
-
-                    this.repository.UpdateProduct(product);
-                    await this.repository.SaveAllSync();
+                    // TODO: Pending to change to: this.User.Identity.Name
+                    product.User = await this.userHelper.GetUserByEmailAsync("jzuluaga55@gmail.com");
+                    await this.productRepository.UpdateAsync(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!this.repository.ProductExists(product.Id))
+                    if (!await this.productRepository.ExistAsync(product.Id))
                     {
                         return NotFound();
                     }
@@ -109,19 +107,19 @@
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             return View(product);
         }
 
         // GET: Products/Delete/5
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = this.repository.GetProduct(id.Value);
-
+            var product = await this.productRepository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -135,11 +133,10 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = this.repository.GetProduct(id);
-            this.repository.RemoveProduct(product);
-            await this.repository.SaveAllSync();
+            var product = await this.productRepository.GetByIdAsync(id);
+            await this.productRepository.DeleteAsync(product);
             return RedirectToAction(nameof(Index));
         }
-
     }
+
 }
